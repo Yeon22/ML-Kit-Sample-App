@@ -20,7 +20,7 @@ class PoseAnalyzer(
                 .addOnSuccessListener { pose ->
                     Log.d(
                         TAG,
-                        "Nose Landmark ${pose.getPoseLandmark(PoseLandmark.NOSE).hashCode()}"
+                        "Nose 3D Position ${pose.getPoseLandmark(PoseLandmark.NOSE)?.position3D}"
                     )
                 }
                 .addOnFailureListener { e ->
