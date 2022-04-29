@@ -1,24 +1,28 @@
 package com.bsuyeon.mlkitinterlock
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.Manifest
 import android.content.pm.PackageManager
+import android.opengl.GLSurfaceView
+import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.util.concurrent.Executors
-import androidx.camera.core.*
-import android.util.Log
-import androidx.camera.lifecycle.ProcessCameraProvider
 import com.bsuyeon.mlkitinterlock.databinding.ActivityMainBinding
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseDetector
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
+import java.util.concurrent.Executors
+
 
 @ExperimentalGetImage
 class MainActivity : AppCompatActivity() {
     private lateinit var imageAnalysis: ImageAnalysis
     private lateinit var viewBinding: ActivityMainBinding
+    private lateinit var myGLSurfaceView: GLSurfaceView
+
     private val cameraExecutor = Executors.newSingleThreadExecutor()
     private val options = PoseDetectorOptions.Builder()
         .setDetectorMode(PoseDetectorOptions.STREAM_MODE)
@@ -30,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
         setPoseAnalyzer()
+        myGLSurfaceView = findViewById(R.id.myGLSurfaceView)
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -39,6 +44,16 @@ class MainActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        myGLSurfaceView.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        myGLSurfaceView.onResume()
     }
 
     private fun setPoseAnalyzer() {
