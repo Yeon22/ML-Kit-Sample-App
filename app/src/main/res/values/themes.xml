@@ -19,7 +19,4 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.MLKitInterlock.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.MLKitInterlock.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

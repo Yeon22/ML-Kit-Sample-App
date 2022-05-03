@@ -4,9 +4,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.opengl.GLSurfaceView
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -35,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
         setPoseAnalyzer()
         myGLSurfaceView = findViewById(R.id.myGLSurfaceView)
+
+        DaeLoader(this)
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -88,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 )
 
             } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
+                println("Use case binding failed $exc")
             }
 
         }, ContextCompat.getMainExecutor(this))
@@ -113,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "ML Kit Sample App"
+        private const val TAG = "MLKit App"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS =
             mutableListOf(
