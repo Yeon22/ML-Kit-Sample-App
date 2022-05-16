@@ -19,21 +19,17 @@ class PoseAnalyzer(
             poseDetector.process(image)
                 .addOnSuccessListener { pose ->
                     Log.d(
-                        TAG,
+                        "PoseAnalyzer",
                         "Nose 3D Position ${pose.getPoseLandmark(PoseLandmark.NOSE)?.position3D}"
                     )
                 }
                 .addOnFailureListener { e ->
-                    Log.e(TAG, "error $e")
+                    Log.e("PoseAnalyzer", "error $e")
                 }
                 .addOnCompleteListener {
                     imageProxy.close()
                     mediaImage.close()
                 }
         }
-    }
-
-    companion object {
-        private const val TAG = "ML Kit Sample App"
     }
 }
