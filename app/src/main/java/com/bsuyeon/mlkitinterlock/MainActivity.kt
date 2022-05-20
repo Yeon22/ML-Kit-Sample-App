@@ -45,11 +45,7 @@ class MainActivity : Activity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
         setPoseAnalyzer()
-
-        surfaceView = SurfaceView(this).apply { setContentView(this) }
-        choreographer = Choreographer.getInstance()
-        modelViewer = ModelViewer(surfaceView)
-        surfaceView.setOnTouchListener(modelViewer)
+        setSurfaceView()
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -92,6 +88,13 @@ class MainActivity : Activity() {
     override fun onPause() {
         super.onPause()
         choreographer.removeFrameCallback(frameCallback)
+    }
+
+    private fun setSurfaceView() {
+        surfaceView = findViewById(R.id.srfView)
+        choreographer = Choreographer.getInstance()
+        modelViewer = ModelViewer(surfaceView)
+        surfaceView.setOnTouchListener(modelViewer)
     }
 
     private fun setPoseAnalyzer() {

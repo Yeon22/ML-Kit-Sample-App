@@ -10,7 +10,7 @@
         android:id="@+id/viewFinder"
         android:layout_width="392dp"
         android:layout_height="408dp"
-        app:layout_constraintBottom_toTopOf="@+id/surfaceView"
+        app:layout_constraintBottom_toTopOf="@+id/srfView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -19,9 +19,9 @@
     </androidx.camera.view.PreviewView>
 
     <SurfaceView
-        android:id="@+id/surfaceView"
-        android:layout_width="413dp"
-        android:layout_height="320dp"
+        android:id="@+id/srfView"
+        android:layout_width="419dp"
+        android:layout_height="361dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
