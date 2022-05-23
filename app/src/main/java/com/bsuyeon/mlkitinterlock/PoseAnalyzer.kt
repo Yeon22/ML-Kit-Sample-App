@@ -13,18 +13,18 @@ class PoseAnalyzer(
     private val poseDetector: PoseDetector
 ) : ImageAnalysis.Analyzer {
     override fun analyze(imageProxy: ImageProxy) {
+        println("analyze")
         val mediaImage = imageProxy.image
         if (mediaImage != null) {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
             poseDetector.process(image)
                 .addOnSuccessListener { pose ->
-                    Log.d(
-                        "PoseAnalyzer",
+                    println(
                         "Nose 3D Position ${pose.getPoseLandmark(PoseLandmark.NOSE)?.position3D}"
                     )
                 }
                 .addOnFailureListener { e ->
-                    Log.e("PoseAnalyzer", "error $e")
+                    println("error $e")
                 }
                 .addOnCompleteListener {
                     imageProxy.close()
