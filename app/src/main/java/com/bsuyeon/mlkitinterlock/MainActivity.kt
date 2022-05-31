@@ -14,8 +14,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bsuyeon.mlkitinterlock.databinding.ActivityMainBinding
 import com.google.android.filament.*
-import com.google.android.filament.utils.ModelViewer
-import com.google.android.filament.utils.Utils
+import com.google.android.filament.utils.*
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseDetector
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
@@ -127,10 +126,30 @@ class MainActivity : Activity() {
     }
 
     private val frameCallback = object : Choreographer.FrameCallback {
+        private val startTime = System.nanoTime()
         override fun doFrame(currentTime: Long) {
+            val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
             choreographer.postFrameCallback(this)
+            modelViewer.asset?.apply {
+                modelViewer.transformToUnitCube()
+                val rootTransform = this.root.getTransform()
+                val degrees = 20f * seconds.toFloat()
+                val zAxis = Float3(0f, 0f, 1f)
+                this.root.setTransform(rootTransform * rotation(zAxis, degrees))
+            }
             modelViewer.render(currentTime)
         }
+
+    }
+
+    private fun Int.getTransform(): Mat4 {
+        val tm = modelViewer.engine.transformManager
+        return Mat4.of(*tm.getTransform(tm.getInstance(this), null))
+    }
+
+    private fun Int.setTransform(mat: Mat4) {
+        val tm = modelViewer.engine.transformManager
+        tm.setTransform(tm.getInstance(this), mat.toFloatArray())
     }
 
     override fun onDestroy() {
