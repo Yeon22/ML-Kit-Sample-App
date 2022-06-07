@@ -126,16 +126,16 @@ class MainActivity : Activity() {
     }
 
     private val frameCallback = object : Choreographer.FrameCallback {
-        private val startTime = System.nanoTime()
         override fun doFrame(currentTime: Long) {
-            val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
             choreographer.postFrameCallback(this)
             modelViewer.asset?.apply {
                 modelViewer.transformToUnitCube()
                 val rootTransform = this.root.getTransform()
-                val degrees = 20f * seconds.toFloat()
-                val zAxis = Float3(0f, 0f, 1f)
-                this.root.setTransform(rootTransform * rotation(zAxis, degrees))
+                println("rootTransform.x " + rootTransform.x)
+                println("rootTransform.y " + rootTransform.y)
+                println("rootTransform.z " + rootTransform.z)
+                println("rootTransform.w " + rootTransform.w)
+                this.root.setTransform(rootTransform)
             }
             modelViewer.render(currentTime)
         }
