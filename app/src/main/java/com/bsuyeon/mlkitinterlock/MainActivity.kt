@@ -1,6 +1,7 @@
 package com.bsuyeon.mlkitinterlock
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -103,7 +104,7 @@ class MainActivity : Activity() {
     }
 
     private fun loadGlb(name: String) {
-        val buffer = readAsset("${name}.glb")
+        val buffer = readAsset("models/${name}.glb")
         modelViewer.loadModelGlb(buffer)
         modelViewer.transformToUnitCube()
     }
@@ -128,28 +129,12 @@ class MainActivity : Activity() {
     private val frameCallback = object : Choreographer.FrameCallback {
         override fun doFrame(currentTime: Long) {
             choreographer.postFrameCallback(this)
+            modelViewer.render(currentTime)
             modelViewer.asset?.apply {
                 modelViewer.transformToUnitCube()
-                val rootTransform = this.root.getTransform()
-                println("rootTransform.x " + rootTransform.x)
-                println("rootTransform.y " + rootTransform.y)
-                println("rootTransform.z " + rootTransform.z)
-                println("rootTransform.w " + rootTransform.w)
-                this.root.setTransform(rootTransform)
+                println("test " + this.skinNames.size)
             }
-            modelViewer.render(currentTime)
         }
-
-    }
-
-    private fun Int.getTransform(): Mat4 {
-        val tm = modelViewer.engine.transformManager
-        return Mat4.of(*tm.getTransform(tm.getInstance(this), null))
-    }
-
-    private fun Int.setTransform(mat: Mat4) {
-        val tm = modelViewer.engine.transformManager
-        tm.setTransform(tm.getInstance(this), mat.toFloatArray())
     }
 
     override fun onDestroy() {
