@@ -50,9 +50,11 @@ class MainActivity : Activity() {
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
-            loadGlb("ybot")
+            loadGlb("Taunt")
             modelViewer.scene.skybox =
                 Skybox.Builder().color(1f, 1f, 1f, 1f).build(modelViewer.engine)
+            // TODO: skin이나 joint 둘 다 0으로 나온다...
+            println("test " + modelViewer.asset!!.getJointCountAt(0))
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
