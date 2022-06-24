@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.content.res.loader.ResourcesLoader
 import android.os.Bundle
 import android.view.Choreographer
 import android.view.SurfaceView
@@ -15,6 +16,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bsuyeon.mlkitinterlock.databinding.ActivityMainBinding
 import com.google.android.filament.*
+import com.google.android.filament.gltfio.FilamentInstance
+import com.google.android.filament.gltfio.MaterialProvider
+import com.google.android.filament.gltfio.ResourceLoader
 import com.google.android.filament.utils.*
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseDetector
@@ -39,6 +43,7 @@ class MainActivity : Activity() {
     private val poseDetector: PoseDetector = PoseDetection.getClient(options)
 
 
+    @SuppressLint("Range")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -49,12 +54,20 @@ class MainActivity : Activity() {
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera()
-            loadGlb("Taunt")
+//            startCamera()
+            loadGltf("Dying")
             modelViewer.scene.skybox =
                 Skybox.Builder().color(1f, 1f, 1f, 1f).build(modelViewer.engine)
-            // TODO: skin이나 joint 둘 다 0으로 나온다...
-            println("test " + modelViewer.asset!!.getJointCountAt(0))
+            val asset = modelViewer.asset!!
+            val rm = modelViewer.engine.renderableManager
+            for (entity in asset.entities) {
+                val renderable = rm.getInstance(entity)
+                if (renderable == 0) {
+                    continue
+                }
+                val material = rm.getMaterialInstanceAt(renderable, 0)
+                material.setParameter("emissiveFactor", 0f, 0f, 0f)
+            }
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
@@ -111,6 +124,12 @@ class MainActivity : Activity() {
         modelViewer.transformToUnitCube()
     }
 
+    private fun loadGltf(name: String) {
+        val buffer = readAsset("models/${name}.gltf")
+        modelViewer.loadModelGltf(buffer) { buffer }
+        modelViewer.transformToUnitCube()
+    }
+
     private fun readAsset(assetName: String): ByteBuffer {
         val input = assets.open(assetName)
         val bytes = ByteArray(input.available())
@@ -129,13 +148,17 @@ class MainActivity : Activity() {
     }
 
     private val frameCallback = object : Choreographer.FrameCallback {
+        private val startTime = System.nanoTime()
         override fun doFrame(currentTime: Long) {
+            val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
             choreographer.postFrameCallback(this)
-            modelViewer.render(currentTime)
-            modelViewer.asset?.apply {
-                modelViewer.transformToUnitCube()
-                println("test " + this.skinNames.size)
+            modelViewer.animator?.apply {
+                if (animationCount > 0) {
+                    applyAnimation(0, seconds.toFloat())
+                }
+                updateBoneMatrices()
             }
+            modelViewer.render(currentTime)
         }
     }
 
