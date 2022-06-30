@@ -54,19 +54,17 @@ class MainActivity : Activity() {
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-//            startCamera()
-            loadGltf("Dying")
+            startCamera()
+            loadGlb("tpose")
             modelViewer.scene.skybox =
                 Skybox.Builder().color(1f, 1f, 1f, 1f).build(modelViewer.engine)
             val asset = modelViewer.asset!!
-            val rm = modelViewer.engine.renderableManager
             for (entity in asset.entities) {
-                val renderable = rm.getInstance(entity)
-                if (renderable == 0) {
-                    continue
+                val entityName: String = asset.getName(entity)
+                // from mixamo joint
+                if (entityName.startsWith("mixamorig:")) {
+                    println("mixamo joint name $entityName")
                 }
-                val material = rm.getMaterialInstanceAt(renderable, 0)
-                material.setParameter("emissiveFactor", 0f, 0f, 0f)
             }
         } else {
             ActivityCompat.requestPermissions(
@@ -118,15 +116,14 @@ class MainActivity : Activity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    /**
+     * If you only have fbx format file, then need to convert to glb(gltf)
+     * You can use blender(import fbx, export gltf)
+     * Just use blender, if you use free convert website may lost joint and skin data.
+     */
     private fun loadGlb(name: String) {
         val buffer = readAsset("models/${name}.glb")
         modelViewer.loadModelGlb(buffer)
-        modelViewer.transformToUnitCube()
-    }
-
-    private fun loadGltf(name: String) {
-        val buffer = readAsset("models/${name}.gltf")
-        modelViewer.loadModelGltf(buffer) { buffer }
         modelViewer.transformToUnitCube()
     }
 
@@ -148,14 +145,9 @@ class MainActivity : Activity() {
     }
 
     private val frameCallback = object : Choreographer.FrameCallback {
-        private val startTime = System.nanoTime()
         override fun doFrame(currentTime: Long) {
-            val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
             choreographer.postFrameCallback(this)
             modelViewer.animator?.apply {
-                if (animationCount > 0) {
-                    applyAnimation(0, seconds.toFloat())
-                }
                 updateBoneMatrices()
             }
             modelViewer.render(currentTime)
