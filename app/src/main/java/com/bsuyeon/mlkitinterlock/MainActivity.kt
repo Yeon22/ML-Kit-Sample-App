@@ -58,12 +58,20 @@ class MainActivity : Activity() {
             loadGlb("tpose")
             modelViewer.scene.skybox =
                 Skybox.Builder().color(1f, 1f, 1f, 1f).build(modelViewer.engine)
+
             val asset = modelViewer.asset!!
+            modelViewer.transformToUnitCube()
             for (entity in asset.entities) {
                 val entityName: String = asset.getName(entity)
                 // from mixamo joint
                 if (entityName.startsWith("mixamorig:")) {
-                    println("mixamo joint name $entityName")
+                    println("mixamo name $entityName")
+                    val instance = modelViewer.engine.transformManager.getInstance(entity)
+                    if (entityName == "mixamorig:RightArm") {
+                        val tm = modelViewer.engine.transformManager
+                        val mat: Mat4 = Mat4.of(*tm.getTransform(instance, FloatArray(16)))
+                        tm.setTransform(instance, (mat * rotation(Float3(1f, 0f, 0f), 10f)).toFloatArray())
+                    }
                 }
             }
         } else {
@@ -134,32 +142,11 @@ class MainActivity : Activity() {
         return ByteBuffer.wrap(bytes)
     }
 
-    override fun onResume() {
-        super.onResume()
-        choreographer.postFrameCallback(frameCallback)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        choreographer.removeFrameCallback(frameCallback)
-    }
-
-    private val frameCallback = object : Choreographer.FrameCallback {
-        override fun doFrame(currentTime: Long) {
-            choreographer.postFrameCallback(this)
-            modelViewer.animator?.apply {
-                updateBoneMatrices()
-            }
-            modelViewer.render(currentTime)
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
         imageAnalysis.clearAnalyzer()
         // Stop the animation and any pending frame
-        choreographer.removeFrameCallback(frameCallback)
     }
 
     companion object {
