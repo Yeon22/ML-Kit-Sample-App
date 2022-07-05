@@ -54,26 +54,10 @@ class MainActivity : Activity() {
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera()
-            loadGlb("tpose")
+//            startCamera()
+            loadGlb("t-pose")
             modelViewer.scene.skybox =
                 Skybox.Builder().color(1f, 1f, 1f, 1f).build(modelViewer.engine)
-
-            val asset = modelViewer.asset!!
-            modelViewer.transformToUnitCube()
-            for (entity in asset.entities) {
-                val entityName: String = asset.getName(entity)
-                // from mixamo joint
-                if (entityName.startsWith("mixamorig:")) {
-                    println("mixamo name $entityName")
-                    val instance = modelViewer.engine.transformManager.getInstance(entity)
-                    if (entityName == "mixamorig:RightArm") {
-                        val tm = modelViewer.engine.transformManager
-                        val mat: Mat4 = Mat4.of(*tm.getTransform(instance, FloatArray(16)))
-                        tm.setTransform(instance, (mat * rotation(Float3(1f, 0f, 0f), 10f)).toFloatArray())
-                    }
-                }
-            }
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
@@ -142,11 +126,74 @@ class MainActivity : Activity() {
         return ByteBuffer.wrap(bytes)
     }
 
+    private val frameCallback = object : Choreographer.FrameCallback {
+        private val startTime = System.nanoTime()
+        override fun doFrame(currentTime: Long) {
+            val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
+            choreographer.postFrameCallback(this)
+            modelViewer.asset?.apply {
+                modelViewer.transformToUnitCube()
+//                var rightHandEntity: Int = getEntityByMixamoName("mixamorig:RightHand")
+//                val rightArmEntity: Int = getEntityByMixamoName("mixamorig:RightArm")
+//                val rightForArmEntity: Int = getEntityByMixamoName("mixamorig:RightForArm")
+//                val rightHandTransform = getTransform(rightHandEntity)
+//                val rightArmTransform = getTransform(rightArmEntity)
+//                val rightForArmTransform = getTransform(rightForArmEntity)
+                val degrees = 20f * seconds.toFloat()
+                val axis = Float3(0f, 0f, 1f)
+//                setTransform(rightHandEntity, rightHandTransform * rotation(axis, degrees))
+//                setTransform(rightArmEntity, rightArmTransform * rotation(axis, degrees))
+//                setTransform(rightForArmEntity, rightForArmTransform * rotation(axis, degrees))
+//                root transform works but...
+                val rootTransform = getTransform(root)
+                setTransform(root, rootTransform * rotation(axis, degrees))
+            }
+            modelViewer.render(currentTime)
+        }
+    }
+
+    private fun getEntityByMixamoName(mixamoName: String): Int {
+        val asset = modelViewer.asset!!
+        var targetEntity: Int = -1
+        for (entity in asset.entities) {
+            val entityName: String = asset.getName(entity)
+            // from mixamo joint
+            if (entityName.startsWith("mixamorig:")) {
+//                println("mixamo name $entityName")
+                if (entityName == mixamoName) {
+                    targetEntity = entity
+                    break
+                }
+            }
+        }
+        return targetEntity
+    }
+
+    private fun getTransform(entity: Int): Mat4 {
+        val tm = modelViewer.engine.transformManager
+        return Mat4.of(*tm.getTransform(tm.getInstance(entity), FloatArray(16)))
+    }
+
+    private fun setTransform(entity: Int, mat4: Mat4) {
+        val tm = modelViewer.engine.transformManager
+        tm.setTransform(tm.getInstance(entity), mat4.toFloatArray())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        choreographer.postFrameCallback(frameCallback)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        choreographer.removeFrameCallback(frameCallback)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
         imageAnalysis.clearAnalyzer()
-        // Stop the animation and any pending frame
+        choreographer.removeFrameCallback(frameCallback)
     }
 
     companion object {
