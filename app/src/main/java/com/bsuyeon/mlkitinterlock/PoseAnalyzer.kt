@@ -1,6 +1,5 @@
 package com.bsuyeon.mlkitinterlock
 
-import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -8,6 +7,10 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.pose.PoseDetector
 import com.google.mlkit.vision.pose.PoseLandmark
 
+/**
+ * Ml Kit Post Analyzer
+ * Get image from camera(when stream_mode) and analyze pose
+ */
 @ExperimentalGetImage
 class PoseAnalyzer(
     private val poseDetector: PoseDetector

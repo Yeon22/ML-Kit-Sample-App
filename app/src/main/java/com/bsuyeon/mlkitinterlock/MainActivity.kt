@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
-import android.content.res.loader.ResourcesLoader
 import android.os.Bundle
 import android.view.Choreographer
 import android.view.SurfaceView
@@ -16,16 +15,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bsuyeon.mlkitinterlock.databinding.ActivityMainBinding
 import com.google.android.filament.*
-import com.google.android.filament.gltfio.FilamentInstance
-import com.google.android.filament.gltfio.MaterialProvider
-import com.google.android.filament.gltfio.ResourceLoader
 import com.google.android.filament.utils.*
 import com.google.mlkit.vision.pose.PoseDetection
 import com.google.mlkit.vision.pose.PoseDetector
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
-
 
 @ExperimentalGetImage
 class MainActivity : Activity() {
@@ -54,7 +49,7 @@ class MainActivity : Activity() {
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-//            startCamera()
+            startCamera()
             loadGlb("t-pose")
             modelViewer.scene.skybox =
                 Skybox.Builder().color(1f, 1f, 1f, 1f).build(modelViewer.engine)
@@ -65,20 +60,19 @@ class MainActivity : Activity() {
         }
     }
 
+    /**
+     * Ml Kit setting
+     */
+    private fun setPoseAnalyzer() {
+        imageAnalysis = ImageAnalysis.Builder().build()
+        imageAnalysis.setAnalyzer(cameraExecutor, PoseAnalyzer(poseDetector))
+    }
+
     private fun setSurfaceView() {
         surfaceView = findViewById(R.id.srfView)
         choreographer = Choreographer.getInstance()
         modelViewer = ModelViewer(surfaceView)
         surfaceView.setOnTouchListener(modelViewer)
-    }
-
-    private fun setPoseAnalyzer() {
-        imageAnalysis = createImageAnalysis()
-        imageAnalysis.setAnalyzer(cameraExecutor, PoseAnalyzer(poseDetector))
-    }
-
-    private fun createImageAnalysis(): ImageAnalysis {
-        return ImageAnalysis.Builder().build()
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -87,6 +81,9 @@ class MainActivity : Activity() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    /**
+     * Start camera with Ml Kit post analyzer
+     */
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
@@ -126,6 +123,9 @@ class MainActivity : Activity() {
         return ByteBuffer.wrap(bytes)
     }
 
+    /**
+     * Animation(Transform) 3D character
+     */
     private val frameCallback = object : Choreographer.FrameCallback {
         private val startTime = System.nanoTime()
         override fun doFrame(currentTime: Long) {
@@ -136,8 +136,8 @@ class MainActivity : Activity() {
                 var rightHand: Int = getFirstEntityByName("mixamorig:RightHand")
                 val rightHandTransform = getTransform(rightHand)
                 val degrees = 20f * seconds.toFloat()
-                val axis = Float3(0f, 0f, 1f)
-                setTransform(rightHand, rightHandTransform * rotation(axis, degrees))
+                val zAxis = Float3(0f, 0f, 1f)
+                setTransform(rightHand, rightHandTransform * rotation(zAxis, degrees))
 //                root transform works but...
 //                val rootTransform = getTransform(root)
 //                setTransform(root, rootTransform * rotation(axis, degrees))
