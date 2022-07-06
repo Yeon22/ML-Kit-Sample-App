@@ -1,4 +1,6 @@
 # ML-Kit-Sample-App
-This is ML Kit Sample App
+This is ML Kit & Google Filament Sample App
 
-Just get Landmark of nose(you can change whatever PoseLandmark).
+Get landmark of body from MlKit.
+Rendering 3D character(mixamo) using Google Filament.
+Get joint data from 3D character.

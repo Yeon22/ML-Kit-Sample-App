@@ -133,40 +133,17 @@ class MainActivity : Activity() {
             choreographer.postFrameCallback(this)
             modelViewer.asset?.apply {
                 modelViewer.transformToUnitCube()
-//                var rightHandEntity: Int = getEntityByMixamoName("mixamorig:RightHand")
-//                val rightArmEntity: Int = getEntityByMixamoName("mixamorig:RightArm")
-//                val rightForArmEntity: Int = getEntityByMixamoName("mixamorig:RightForArm")
-//                val rightHandTransform = getTransform(rightHandEntity)
-//                val rightArmTransform = getTransform(rightArmEntity)
-//                val rightForArmTransform = getTransform(rightForArmEntity)
+                var rightHand: Int = getFirstEntityByName("mixamorig:RightHand")
+                val rightHandTransform = getTransform(rightHand)
                 val degrees = 20f * seconds.toFloat()
                 val axis = Float3(0f, 0f, 1f)
-//                setTransform(rightHandEntity, rightHandTransform * rotation(axis, degrees))
-//                setTransform(rightArmEntity, rightArmTransform * rotation(axis, degrees))
-//                setTransform(rightForArmEntity, rightForArmTransform * rotation(axis, degrees))
+                setTransform(rightHand, rightHandTransform * rotation(axis, degrees))
 //                root transform works but...
-                val rootTransform = getTransform(root)
-                setTransform(root, rootTransform * rotation(axis, degrees))
+//                val rootTransform = getTransform(root)
+//                setTransform(root, rootTransform * rotation(axis, degrees))
             }
             modelViewer.render(currentTime)
         }
-    }
-
-    private fun getEntityByMixamoName(mixamoName: String): Int {
-        val asset = modelViewer.asset!!
-        var targetEntity: Int = -1
-        for (entity in asset.entities) {
-            val entityName: String = asset.getName(entity)
-            // from mixamo joint
-            if (entityName.startsWith("mixamorig:")) {
-//                println("mixamo name $entityName")
-                if (entityName == mixamoName) {
-                    targetEntity = entity
-                    break
-                }
-            }
-        }
-        return targetEntity
     }
 
     private fun getTransform(entity: Int): Mat4 {
